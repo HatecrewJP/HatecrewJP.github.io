@@ -18,7 +18,9 @@
         width: 255px;
         height: 120px;
         position: relative;
-        color: rgb(189, 189, 189);
+        -webkit-text-stroke-width: 2px;
+        -webkit-text-stroke-color: black;
+        color: rgb(255, 255, 255);
     }
     #timer > #colon{
         position: absolute;
@@ -128,8 +130,11 @@
 
     function TimerReset(){
         if(!IsRunning){
-            PreviousTime = CurrentTimeSeconds;
-            CurrentTimeSeconds = -1;
+            if(CurrentTimeSeconds > 0){
+                PreviousTime = CurrentTimeSeconds;
+                CurrentTimeSeconds = -1;
+            }
+            
             IsSecondHalf = 0;
            DisplayTime(0,0);
         }
@@ -139,9 +144,12 @@
     }
     function TimerRestore(){
         if(!IsRunning){
-            var tmp = CurrentTimeSeconds;
-            CurrentTimeSeconds = PreviousTime;
-            PreviousTime = tmp;
+            if(PreviousTime >= 0){
+                var tmp = CurrentTimeSeconds;
+                CurrentTimeSeconds = PreviousTime;
+                PreviousTime = tmp;
+            }
+            
             var DisplayTimeSeconds = CurrentTimeSeconds % 60;
             var DisplayTimeMinutes = Math.floor(CurrentTimeSeconds / 60);
             DisplayTime(DisplayTimeMinutes,DisplayTimeSeconds)
