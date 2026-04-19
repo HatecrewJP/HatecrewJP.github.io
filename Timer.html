@@ -1,39 +1,141 @@
 <!DOCTYPE html>
+
+
+<style>
+    .timer_controls > button {
+        position: relative;
+        top:200px;
+        font-size: 50px;
+    }
+    
+    #timer{
+        font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', monospace;
+        font-size: 100px;
+        width: 240px;
+        height: 120px;
+        position: relative;
+        color: gray;
+    }
+    #timer > #minutes{
+        position: absolute;
+        left: 0px;
+        width: 105px;
+        text-align: right;
+    }
+    #timer > #colon{
+        position: absolute;
+        width: 20px;
+        left: 105px;
+        text-align: center;
+    }
+    #timer > #seconds{
+        position: absolute;
+        width: 105px;
+        left: 125px;
+        text-align: left;
+    }
+
+    body{
+        margin-top: 0;
+        margin-bottom: 0;
+        margin-left: 0;
+        margin-right: 0;
+    }
+</style>
+
 <html>
-<button onclick="TimerActivate()">Activate Timer</button>
-<button onclick="TimerDeactivate()">Deactivate Timer</button>
-<button onclick="TimerReset()">Reset Timer</button>
-<div class="Timer">
-    <div id="timer">00:00</div>
-</div>
+    <body>
+    <div class="Timer" id="timer">
+        <span id="minutes">00</span><span id="colon">:</span><span id="seconds">00</span>
+    </div>
+    <div class="timer_controls"> 
+        <button onclick="TimerStart()">Start</button>
+        <button onclick="TimerPause()">Pause</button>
+        <button onclick="TimerEnd1stHalf()">End 1st half</button>
+        <button onclick="TimerPrep2ndHalf()">Prep 2nd half</button>
+
+        <button onclick="TimerReset()">Reset</button>
+        <button onclick="TimerRestore()">Restore Timer</button>
+    </div>
+    </body>
+    
+
+
 
 <script>
-    var TimerElement = document.getElementById("timer");
+    var TimerElementSecs = document.getElementById("seconds");
+    var TimerElementMins = document.getElementById("minutes");
     var PreviousTimeStamp = 0;
     var IsRunning = false;
     var CurrentTimeSeconds = -1;
+    var DisplayTimeMinutes = 0;
     var NewTimeStamp = 0;
     var Elapsed = 0;
+    var IsSecondHalf = 0;
+    var PreviousTime = 0;
 
-    function TimerActivate() {
+    function TimerStart() {
         IsRunning = true;
         Update();
     }
-    function TimerDeactivate() {
+    function TimerPause() {
         IsRunning = false;
         Update();
     }
+    function TimerPrep2ndHalf(){
+        if(!IsRunning){
+            CurrentTimeSeconds = 45 * 60;
+            IsSecondHalf = 1;
+            DisplayTimeInElement(TimerElementMins,TimerElementSecs,45,0);
+        }
+    }
+
+
+    function TimerEnd1stHalf(){
+        if(CurrentTimeSeconds > 45 * 60 && !IsSecondHalf){
+            IsRunning = false;
+            CurrentTimeSeconds = 45 * 60;
+            DisplayTimeInElement(TimerElementMins,TimerElementSecs,45,0);
+        }
+        
+        Update();
+    }
+
+
     function TimerReset(){
-        IsRunning = false;
-        CurrentTimeSeconds = -1;
-        TimerElement.innerHTML ="00:00";
+        if(!IsRunning){
+            PreviousTime = CurrentTimeSeconds;
+            CurrentTimeSeconds = -1;
+            IsSecondHalf = 0;
+           DisplayTimeInElement(TimerElementMins,TimerElementSecs,0,0);
+        }
+
+       
         Update();
     }
+    function TimerRestore(){
+        if(!IsRunning){
+            var tmp = CurrentTimeSeconds;
+            CurrentTimeSeconds = PreviousTime;
+            PreviousTime = tmp;
+            var DisplayTimeSeconds = CurrentTimeSeconds % 60;
+            var DisplayTimeMinutes = Math.floor(CurrentTimeSeconds / 60);
+            DisplayTimeInElement(TimerElementMins,TimerElementSecs,DisplayTimeMinutes,DisplayTimeSeconds)
+        }
+        Update();
+    }
+
     function FirstFrame(timestamp){
         PreviousTimeStamp = timestamp;
         Update(timestamp);
     }
-   
+    
+    function DisplayTimeInElement(ElementMin,ElementSec, TimeMin, TimeSec){
+
+        ElementMin.innerHTML = TimeMin.toString().padStart(2,"0");
+        ElementSec.innerHTML = TimeSec.toString().padStart(2,"0");
+    }
+
     function Update(timestamp) {
         if (IsRunning) {
             Elapsed = timestamp - PreviousTimeStamp;
@@ -42,9 +144,7 @@
                 CurrentTimeSeconds = CurrentTimeSeconds + 1;
                 var DisplayTimeSeconds = CurrentTimeSeconds % 60;
                 var DisplayTimeMinutes = Math.floor(CurrentTimeSeconds / 60);
-                var StrDisplaySeconds = DisplayTimeSeconds.toString().padStart(2,"0");
-                var StrDisplayMinutes = DisplayTimeMinutes.toString().padStart(2,"0");
-                TimerElement.innerHTML = StrDisplayMinutes + ":" + StrDisplaySeconds;
+                DisplayTimeInElement(TimerElementMins,TimerElementSecs,DisplayTimeMinutes,DisplayTimeSeconds)
             }
         }
         window.requestAnimationFrame(Update);
