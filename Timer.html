@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<button onclick="TimerActivate()">Activate Timer</button>
+<button onclick="TimerDeactivate()">Deactivate Timer</button>
+<button onclick="TimerReset()">Reset Timer</button>
+<div class="Timer">
+    <div id="timer">00:00</div>
+</div>
+
+<script>
+    var TimerElement = document.getElementById("timer");
+    var PreviousTimeStamp = 0;
+    var IsRunning = false;
+    var CurrentTimeSeconds = -1;
+    var NewTimeStamp = 0;
+    var Elapsed = 0;
+
+    function TimerActivate() {
+        IsRunning = true;
+        Update();
+    }
+    function TimerDeactivate() {
+        IsRunning = false;
+        Update();
+    }
+    function TimerReset(){
+        IsRunning = false;
+        CurrentTimeSeconds = -1;
+        TimerElement.innerHTML ="00:00";
+        Update();
+    }
+    function FirstFrame(timestamp){
+        PreviousTimeStamp = timestamp;
+        Update(timestamp);
+    }
+   
+    function Update(timestamp) {
+        if (IsRunning) {
+            Elapsed = timestamp - PreviousTimeStamp;
+            if(Elapsed >= 1000){
+                PreviousTimeStamp = timestamp;
+                CurrentTimeSeconds = CurrentTimeSeconds + 1;
+                var DisplayTimeSeconds = CurrentTimeSeconds % 60;
+                var DisplayTimeMinutes = Math.floor(CurrentTimeSeconds / 60);
+                var StrDisplaySeconds = DisplayTimeSeconds.toString().padStart(2,"0");
+                var StrDisplayMinutes = DisplayTimeMinutes.toString().padStart(2,"0");
+                TimerElement.innerHTML = StrDisplayMinutes + ":" + StrDisplaySeconds;
+            }
+        }
+        window.requestAnimationFrame(Update);
+    }
+
+    window.requestAnimationFrame(FirstFrame);
+
+
+</script>
+
+</html>
