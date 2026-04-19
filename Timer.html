@@ -1,5 +1,10 @@
 <!DOCTYPE html>
 
+<!-- OBS bounding box: -->
+<!-- 1920x1080 -> l:0,r:1725,t:0,b:1150-->
+<!--  800x 600 -> l:0,r: 545,t:0,b: 480-->
+
+
 
 <style>
     .timer_controls > button {
@@ -7,33 +12,49 @@
         top:200px;
         font-size: 50px;
     }
-    
-    #timer{
+     #timer{
         font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', monospace;
         font-size: 100px;
-        width: 240px;
+        width: 255px;
         height: 120px;
         position: relative;
-        color: gray;
-    }
-    #timer > #minutes{
-        position: absolute;
-        left: 0px;
-        width: 105px;
-        text-align: right;
+        color: rgb(189, 189, 189);
     }
     #timer > #colon{
         position: absolute;
         width: 20px;
-        left: 105px;
+        left: 115px;
         text-align: center;
     }
-    #timer > #seconds{
+
+   
+    #timer > #min10{
         position: absolute;
-        width: 105px;
-        left: 125px;
+        left: 0px;
+        width: 55px;
+        text-align: right;
+    }
+    #timer > #min1{
+        position: absolute;
+        left: 55px;
+        width: 55px;
+        text-align: right;
+    }
+  
+    #timer > #sec10{
+        position: absolute;
+        left: 140px;
+        width: 55px;
+        text-align: right;
+    }
+
+    #timer > #sec1{
+        position: absolute;
+        left: 195px;
+        width: 55px;
         text-align: left;
     }
+   
 
     body{
         margin-top: 0;
@@ -46,7 +67,7 @@
 <html>
     <body>
     <div class="Timer" id="timer">
-        <span id="minutes">00</span><span id="colon">:</span><span id="seconds">00</span>
+        <span id="min10">9</span><span id="min1">9</span><span id="colon">:</span><span id="sec10">9</span><span id="sec1">9</span>
     </div>
     <div class="timer_controls"> 
         <button onclick="TimerStart()">Start</button>
@@ -63,8 +84,11 @@
 
 
 <script>
-    var TimerElementSecs = document.getElementById("seconds");
-    var TimerElementMins = document.getElementById("minutes");
+    var TimerElementSec10 = document.getElementById("sec10");
+    var TimerElementSec1 = document.getElementById("sec1");
+    var TimerElementMin10 = document.getElementById("min10");
+    var TimerElementMin1 = document.getElementById("min1");
+
     var PreviousTimeStamp = 0;
     var IsRunning = false;
     var CurrentTimeSeconds = -1;
@@ -86,7 +110,7 @@
         if(!IsRunning){
             CurrentTimeSeconds = 45 * 60;
             IsSecondHalf = 1;
-            DisplayTimeInElement(TimerElementMins,TimerElementSecs,45,0);
+             DisplayTime(45,0);
         }
     }
 
@@ -95,7 +119,7 @@
         if(CurrentTimeSeconds > 45 * 60 && !IsSecondHalf){
             IsRunning = false;
             CurrentTimeSeconds = 45 * 60;
-            DisplayTimeInElement(TimerElementMins,TimerElementSecs,45,0);
+            DisplayTime(45,0);
         }
         
         Update();
@@ -107,7 +131,7 @@
             PreviousTime = CurrentTimeSeconds;
             CurrentTimeSeconds = -1;
             IsSecondHalf = 0;
-           DisplayTimeInElement(TimerElementMins,TimerElementSecs,0,0);
+           DisplayTime(0,0);
         }
 
        
@@ -120,7 +144,7 @@
             PreviousTime = tmp;
             var DisplayTimeSeconds = CurrentTimeSeconds % 60;
             var DisplayTimeMinutes = Math.floor(CurrentTimeSeconds / 60);
-            DisplayTimeInElement(TimerElementMins,TimerElementSecs,DisplayTimeMinutes,DisplayTimeSeconds)
+            DisplayTime(DisplayTimeMinutes,DisplayTimeSeconds)
         }
         Update();
     }
@@ -130,11 +154,17 @@
         Update(timestamp);
     }
     
-    function DisplayTimeInElement(ElementMin,ElementSec, TimeMin, TimeSec){
+    function DisplayTime(TimeMin, TimeSec){
+        TimerElementMin1.innerHTML = TimeMin % 10;
+        TimerElementMin10.innerHTML = Math.floor(TimeMin / 10);
 
-        ElementMin.innerHTML = TimeMin.toString().padStart(2,"0");
-        ElementSec.innerHTML = TimeSec.toString().padStart(2,"0");
+        TimerElementSec1.innerHTML = TimeSec % 10;
+        TimerElementSec10.innerHTML = Math.floor(TimeSec / 10);
     }
+
+     
+
+
 
     function Update(timestamp) {
         if (IsRunning) {
@@ -144,7 +174,7 @@
                 CurrentTimeSeconds = CurrentTimeSeconds + 1;
                 var DisplayTimeSeconds = CurrentTimeSeconds % 60;
                 var DisplayTimeMinutes = Math.floor(CurrentTimeSeconds / 60);
-                DisplayTimeInElement(TimerElementMins,TimerElementSecs,DisplayTimeMinutes,DisplayTimeSeconds)
+                DisplayTime(DisplayTimeMinutes,DisplayTimeSeconds)
             }
         }
         window.requestAnimationFrame(Update);
