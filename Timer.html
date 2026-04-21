@@ -13,7 +13,7 @@
         font-size: 50px;
     }
      #timer{
-        font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', monospace;
+        font-family: Impact, Haettenschweiler, 'Arial Bold', monospace;
         font-size: 100px;
         width: 255px;
         height: 120px;
@@ -22,7 +22,7 @@
         -webkit-text-stroke-color: black;
         color: rgb(255, 255, 255);
     }
-    #timer > #colon{
+    #timer > #colon{ 
         position: absolute;
         width: 20px;
         left: 115px;
@@ -90,105 +90,102 @@
     var TimerElementSec1 = document.getElementById("sec1");
     var TimerElementMin10 = document.getElementById("min10");
     var TimerElementMin1 = document.getElementById("min1");
-
-    var PreviousTimeStamp = 0;
+    
     var IsRunning = false;
-    var CurrentTimeSeconds = -1;
-    var DisplayTimeMinutes = 0;
-    var NewTimeStamp = 0;
-    var Elapsed = 0;
+    var PreviousTimeStamp = 0;
+
+    var TotalTime = 0;
     var IsSecondHalf = 0;
-    var PreviousTime = 0;
+
+
+    var BackupTotalTime = 0;
+    var BackUpIsSecondHalf = 0;
 
     function TimerStart() {
         IsRunning = true;
-        Update();
+        PreviousTimeStamp = undefined;
     }
     function TimerPause() {
         IsRunning = false;
-        Update();
     }
     function TimerPrep2ndHalf(){
         if(!IsRunning){
-            CurrentTimeSeconds = 45 * 60;
+            BackupTotalTime = TotalTime;
+            BackUpIsSecondHalf = IsSecondHalf;
+
+            TotalTime = 45 * 60 * 1000;
             IsSecondHalf = 1;
-             DisplayTime(45,0);
+            DisplayTime(TotalTime);
         }
     }
 
 
     function TimerEnd1stHalf(){
-        if(CurrentTimeSeconds > 45 * 60 && !IsSecondHalf){
+        if(TotalTime > 45 * 60 * 1000 && !IsSecondHalf){
+            BackupTotalTime = TotalTime;
+            BackUpIsSecondHalf = IsSecondHalf;
+            
             IsRunning = false;
-            CurrentTimeSeconds = 45 * 60;
-            DisplayTime(45,0);
+            TotalTime = 45 * 60 * 1000;
+            IsSecondHalf = 1;
+            DisplayTime(TotalTime);
         }
-        
-        Update();
     }
 
 
     function TimerReset(){
         if(!IsRunning){
-            if(CurrentTimeSeconds > 0){
-                PreviousTime = CurrentTimeSeconds;
-                CurrentTimeSeconds = -1;
-            }
-            
-            IsSecondHalf = 0;
-           DisplayTime(0,0);
-        }
+            BackupTotalTime = TotalTime;
+            BackUpIsSecondHalf = IsSecondHalf;
 
-       
-        Update();
+            TotalTime = 0;
+            IsSecondHalf = 0;
+            DisplayTime(TotalTime);
+        }
     }
     function TimerRestore(){
         if(!IsRunning){
-            if(PreviousTime >= 0){
-                var tmp = CurrentTimeSeconds;
-                CurrentTimeSeconds = PreviousTime;
-                PreviousTime = tmp;
+            if(BackupTotalTime > 0){
+                var tmp = TotalTime;
+                TotalTime = BackupTotalTime;
+                BackupTotalTime = tmp;
             }
-            
-            var DisplayTimeSeconds = CurrentTimeSeconds % 60;
-            var DisplayTimeMinutes = Math.floor(CurrentTimeSeconds / 60);
-            DisplayTime(DisplayTimeMinutes,DisplayTimeSeconds)
+            DisplayTime(TotalTime)
         }
-        Update();
     }
 
-    function FirstFrame(timestamp){
-        PreviousTimeStamp = timestamp;
-        Update(timestamp);
-    }
     
-    function DisplayTime(TimeMin, TimeSec){
-        TimerElementMin1.innerHTML = TimeMin % 10;
-        TimerElementMin10.innerHTML = Math.floor(TimeMin / 10);
+    function DisplayTime(TimeMilSec){
+         var TimeSeconds = Math.floor(TimeMilSec/1000);
+        var DisplayTimeSeconds = TimeSeconds % 60;
+        var DisplayTimeMinutes = Math.floor(TimeSeconds / 60);
 
-        TimerElementSec1.innerHTML = TimeSec % 10;
-        TimerElementSec10.innerHTML = Math.floor(TimeSec / 10);
+        TimerElementMin1.innerHTML = DisplayTimeMinutes % 10;
+        TimerElementMin10.innerHTML = Math.floor(DisplayTimeMinutes / 10);
+
+        TimerElementSec1.innerHTML = DisplayTimeSeconds % 10;
+        TimerElementSec10.innerHTML = Math.floor(DisplayTimeSeconds / 10);
     }
 
      
 
 
-
+    
     function Update(timestamp) {
+        if(PreviousTimeStamp === undefined){
+            PreviousTimeStamp = timestamp;
+        }
         if (IsRunning) {
             Elapsed = timestamp - PreviousTimeStamp;
-            if(Elapsed >= 1000){
-                PreviousTimeStamp = timestamp;
-                CurrentTimeSeconds = CurrentTimeSeconds + 1;
-                var DisplayTimeSeconds = CurrentTimeSeconds % 60;
-                var DisplayTimeMinutes = Math.floor(CurrentTimeSeconds / 60);
-                DisplayTime(DisplayTimeMinutes,DisplayTimeSeconds)
-            }
+            TotalTime = TotalTime + Elapsed;
+            DisplayTime(TotalTime)
+            PreviousTimeStamp = timestamp;
         }
         window.requestAnimationFrame(Update);
     }
 
-    window.requestAnimationFrame(FirstFrame);
+    window.requestAnimationFrame(Update);
+    
 
 
 </script>
